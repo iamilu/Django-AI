@@ -1,1 +1,66 @@
-<h2>This is Index file</h2>
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% load mathfilters %}
+
+{% block content %}
+<!-- ========================= SECTION MAIN ========================= -->
+<section class="section-intro padding-y-sm">
+<div class="container">
+
+<div class="intro-banner-wrap">
+	<img src="{%static 'images/banners/cover.jpg' %}" class="img-fluid rounded">
+</div>
+
+</div> <!-- container //  -->
+</section>
+<!-- ========================= SECTION MAIN END// ========================= -->
+
+<!-- ========================= SECTION  ========================= -->
+<section class="section-name padding-y-sm">
+<div class="container">
+
+<header class="section-heading">
+	<a href="#" class="btn btn-outline-primary float-right">See all</a>
+	<h3 class="section-title">Popular products</h3>
+</header><!-- sect-heading -->
+
+	
+<div class="row">
+	{% for product in products %}
+	<div class="col-md-3">
+		<div class="card card-product-grid">
+			<a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.image.url }}"> </a>
+			<figcaption class="info-wrap">
+				<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
+				<div class="price mt-1">${{ product.price }} <del class="price-old">${{ product.price | mul:1.25 }}</del></div> <!-- price-wrap.// -->
+				{% if product.avgRating and product.reviewCount %}
+					<div class="rating-star">
+						<span>
+							<!-- use of font awesome star icon -->
+							<i class="fa {% if product.avgRating == 0.5 %}fa-star-half-stroke{% elif product.avgRating >= 1.0 %}fa-star{% endif %}" arial-hidden="true"></i>
+							<i class="fa {% if product.avgRating == 1.5 %}fa-star-half-stroke{% elif product.avgRating >= 2.0 %}fa-star{% endif %}" arial-hidden="true"></i>
+							<i class="fa {% if product.avgRating == 2.5 %}fa-star-half-stroke{% elif product.avgRating >= 3.0 %}fa-star{% endif %}" arial-hidden="true"></i>
+							<i class="fa {% if product.avgRating == 3.5 %}fa-star-half-stroke{% elif product.avgRating >= 4.0 %}fa-star{% endif %}" arial-hidden="true"></i>
+							<i class="fa {% if product.avgRating == 4.5 %}fa-star-half-stroke{% elif product.avgRating >= 5.0 %}fa-star{% endif %}" arial-hidden="true"></i>
+							<span>{{ product.reviewCount }} reviews</span>
+						</span>
+					</div>
+				{% else %}
+					<span>No Review is available</span>
+				{% endif %}
+			</figcaption>
+		</div>
+	</div> <!-- col.// -->
+	{% endfor %}
+</div> <!-- row.// -->
+
+</div><!-- container // -->
+</section>
+<!-- ========================= SECTION  END// ========================= -->
+
+</body>
+</html>
+
+{% endblock %}

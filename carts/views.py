@@ -10,5 +10,3 @@ def get_cart_id(request):
     if session_id is None:
         session_id = request.session.create()
     return session_id
-
-

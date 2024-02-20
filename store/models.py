@@ -10,7 +10,7 @@ product_name, slug, description, price, image, stock, created_date, modified_dat
 '''
 class Product(models.Model):
     product_name = models.CharField(max_length=50, unique=True)
-    slug = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
     description = models.TextField(max_length=500, blank=True)
     price = models.FloatField()
     image = models.ImageField(upload_to='photos/products')
