@@ -74,6 +74,13 @@ class Account(AbstractBaseUser):
     def has_module_perms(self, add_label):
         return True
 
+    def full_name(self):
+        return self.first_name + ' ' + self.last_name
+    
+    def get_profile_pic(self, object):
+        user_profile = UserProfile.objects.get(user=object)
+        return user_profile.profile_pic.url
+
 '''
 write a User Profile model to store user profile details with fields name
 user as one to one field, profile picture, address line 1, adress line 2, city, pincode, state, country
@@ -84,8 +91,12 @@ class UserProfile(models.Model):
     address_line_1 = models.CharField(blank=True, max_length=100)
     address_line_2 = models.CharField(blank=True, max_length=100)
     city = models.CharField(blank=True, max_length=20)
+    pincode = models.CharField(blank=True, max_length=20)
     state = models.CharField(blank=True, max_length=20)
     country = models.CharField(blank=True, max_length=20)
 
     def __str__(self):
         return self.user.first_name
+    
+    def full_address(self):
+        return self.address_line_1 + ' ' + self.address_line_2
