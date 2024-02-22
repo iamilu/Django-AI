@@ -65,6 +65,12 @@ class Order(models.Model):
 
     def __str__(self):
         return self.order_number
+    
+    def full_name(self):
+        return self.first_name + ' ' + self.last_name
+
+    def full_address(self):
+        return self.address_line_1 + ' ' + self.address_line_2
 
 '''
 write a Order Product model with the following fields

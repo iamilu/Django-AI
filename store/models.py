@@ -1,6 +1,7 @@
 from django.db import models
 from category.models import Category
 from accounts.models import Account
+from django.urls import reverse
 
 # Create your models here.
 
@@ -22,6 +23,29 @@ class Product(models.Model):
 
     def __str__(self):
         return self.product_name
+    
+    def get_url(self):
+        return reverse('product_detail', args=[self.category.slug, self.slug])
+    
+    '''
+    get average rating of the product
+    '''
+    def avgRating(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=models.Avg('rating'))
+        avg = 0
+        if reviews['average'] is not None:
+            avg = float(reviews['average'])
+        return avg
+    
+    '''
+    get total review count of the product
+    '''
+    def countReview(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=models.Count('id'))
+        total = 0
+        if reviews['count'] is not None:
+            total = int(reviews['count'])
+        return total
 
 '''
 write a Product Gallery model to store information related to product gallery with fields name

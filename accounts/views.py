@@ -8,11 +8,14 @@ from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Account, UserProfile
+from carts.models import Cart, CartItem
 from orders.models import Order, OrderProduct
+from carts.views import get_cart_id
 from .forms import RegistrationForm, UserForm, UserProfileForm
 from .utils import send_otp
 import pyotp
 import datetime
+import requests
 
 def register(request):
     if request.method == 'POST':
@@ -88,12 +91,67 @@ def otp(request):
                 
                 if totp.verify(otp):
                     user = get_object_or_404(Account, email=email)
+
+                    # GROUPING product variation before and after user logged in
+                    try:
+                        cart = Cart.objects.get(cart_id=get_cart_id(request))
+                        is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                        
+                        if is_cart_item_exists:
+                            
+                            #get product variation when user is not logged in (by using cart id)
+                            product_variation_non_logged_in = []
+                            cart_items = CartItem.objects.filter(cart=cart)
+                            for cart_item in cart_items:
+                                variation = cart_item.variation.all()
+                                product_variation_non_logged_in.append(list(variation))
+
+                            #get product variation when user is logged in (by using user)
+                            product_variation_logged_in = []
+                            cart_item_id_list = []
+                            cart_items = CartItem.objects.filter(user=user)
+                            for cart_item in cart_items:
+                                variation = cart_item.variation.all()
+                                product_variation_logged_in.append(list(variation))
+                                cart_item_id_list.append(cart_item.id)
+
+                            # if product variation present before and after user logged in, then increment the cart item quantity by 1 else assign user to the cart item
+                            for product_variation in product_variation_non_logged_in:
+                                if product_variation in product_variation_logged_in:
+                                    index = product_variation_logged_in.index(product_variation)
+                                    cart_item_id = cart_item_id_list[index]
+                                    cart_item = CartItem.objects.get(id=cart_item_id)
+                                    cart_item.quantity += 1
+                                    cart_item.user = user
+                                    cart_item.save()
+                                else:
+                                    cart_items_non_logged_in = CartItem.objects.filter(cart=cart)
+                                    for cart_item in cart_items_non_logged_in:
+                                        cart_item.user = user
+                                        cart_item.save()
+                    except:
+                        pass
+
                     auth.login(request, user)
                     messages.success(request, 'Login successful')
                     
                     del request.session['otp_secret_key']
                     del request.session['otp_valid_until']
                     
+                    # if user hit checkout before logging
+                    url = request.META.get('HTTP_REFERER')
+                    print(url)
+                    try:
+                        query = requests.utils.urlparse(url).query
+                        print(query)
+                        params = dict(x.split('=') for x in query.split('&'))
+                        print(params)
+                        if 'next' in params:
+                            next_page = params['next']
+                            return redirect(next_page)
+                    except:
+                        return redirect('dashboard')
+
                     return redirect('dashboard')
                 else:
                     messages.error(request, 'Invalid OTP.')
