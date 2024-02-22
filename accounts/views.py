@@ -14,7 +14,7 @@ from carts.views import get_cart_id
 from .forms import RegistrationForm, UserForm, UserProfileForm
 from .utils import send_otp
 import pyotp
-import datetime
+from datetime import datetime
 import requests
 
 def register(request):

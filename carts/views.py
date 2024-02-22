@@ -107,7 +107,8 @@ def add_cart(request, product_id):
                 cart_item.variation.add(*product_variation)
             cart_item.save()
     else:
-        cart_items = CartItem.objects.get(cart__cart_id=get_cart_id(request), product=product)
+        cart = Cart.objects.get(cart_id=get_cart_id(request))
+        cart_items = CartItem.objects.get(cart=cart, product=product)
 
         if cart_items.exists():
             existing_variation_list = []

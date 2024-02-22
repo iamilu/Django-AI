@@ -23,6 +23,8 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('ecomm.urls')),
-    # path('', include('category.urls')),
-    # path('', include('store.urls')),
+    path('store/', include('store.urls')),
+    path('cart/', include('carts.urls')),
+    path('accounts/', include('accounts.urls')),
+    path('orders/', include('orders.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
