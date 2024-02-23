@@ -3,6 +3,8 @@ from category.models import Category
 from accounts.models import Account
 from django.urls import reverse
 
+import math
+
 # Create your models here.
 
 '''
@@ -30,20 +32,44 @@ class Product(models.Model):
     '''
     get average rating of the product
     '''
+    @property
     def avgRating(self):
         reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=models.Avg('rating'))
         avg = 0
-        if reviews['average'] is not None:
+        if reviews:
             avg = float(reviews['average'])
+        
+        if avg < 0.5:
+            avg = math.floor(avg)
+        elif avg > 0.5:
+            avg = math.ceil(avg)
+        if avg < 1.5:
+            avg = math.floor(avg)
+        elif avg > 1.5:
+            avg = math.ceil(avg)
+        if avg < 2.5:
+            avg = math.floor(avg)
+        elif avg > 2.5:
+            avg = math.ceil(avg)
+        if avg < 3.5:
+            avg = math.floor(avg)
+        elif avg > 3.5:
+            avg = math.ceil(avg)
+        if avg < 4.5:
+            avg = math.floor(avg)
+        elif avg > 4.5:
+            avg = math.ceil(avg)
+
         return avg
     
     '''
     get total review count of the product
     '''
+    @property
     def countReview(self):
         reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=models.Count('id'))
         total = 0
-        if reviews['count'] is not None:
+        if reviews:
             total = int(reviews['count'])
         return total
 

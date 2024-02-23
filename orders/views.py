@@ -29,12 +29,12 @@ def place_order(request):
             return redirect('store')
         else:
             total = 0
-            quantity
+            quantity = 0
             for item in cart_items:
                 total += item.product.price * item.quantity
-                quantity += item
+                quantity += item.quantity
             
-            tax = 0.05 * total
+            tax = round(0.05 * total, 2)
             grand_total = total + tax
 
         if request.method == 'POST':
@@ -53,6 +53,8 @@ def place_order(request):
                 order.address_line_2 = form.cleaned_data['address_line_2']
                 order.city = form.cleaned_data['city']
                 order.pincode = form.cleaned_data['pincode']
+                order.state = form.cleaned_data['state']
+                order.country = form.cleaned_data['country']
                 order.order_note = form.cleaned_data.get('order_note')
                 order.order_total = grand_total
                 order.tax = tax
@@ -149,12 +151,12 @@ def payments(request):
         order_product.product_price = item.product.price
         order_product.is_ordered = True
         order_product.save()
+
         '''
         store product variation details in OrderProduct Model
         '''
-        cart_item = CartItem.objects.get(id=item.id)
         # get variation of each item
-        product_variation = cart_item.variation.all()
+        product_variation = item.variation.all()
         # order_product id will get generated as you have saved the object earlier
         order_product = OrderProduct.objects.get(id=order_product.id)
         order_product.variation.set(product_variation)
@@ -168,9 +170,9 @@ def payments(request):
         product.save()
     
     '''
-    clear the cart once order is placed
+    clear the cart items once order is placed
     '''
-    Cart.objects.filter(user=request.user).delete()
+    CartItem.objects.filter(user=request.user).delete()
 
     '''
     send order complete email to the user
@@ -216,13 +218,13 @@ def order_complete(request):
             total += item.product_price * item.quantity
             quantity += item.quantity
         
-        tax = 0.05 * total
+        tax = round(0.05 * total, 2)
         grand_total = total + tax
 
         context = {
             'order': order,
             'payment': payment,
-            'order_products': order_products,
+            'order_product': order_products,
             'total': total,
             'tax': tax,
             'grand_total': grand_total,

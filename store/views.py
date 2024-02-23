@@ -1,6 +1,3 @@
-'''
-write a store view to grab all products based on category slug name, if category slug is not None, else grab all products and pass it to the store.html page as context
-'''
 from django.shortcuts import render, redirect
 from .models import Product, ProductGallery, ReviewRating
 from .forms import ReviewForm
@@ -12,12 +9,17 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib import messages
 
+'''
+write a store view to grab all products based on category slug name, if category slug is not None, 
+else grab all products and pass it to the store.html page as context
+'''
+
 def store(request, category_slug=None):
     categories = None
     products = None
     if category_slug != None:
-        categories = Category.objects.filter(slug=category_slug)
-        products = Product.objects.filter(category=categories, is_available=True)
+        category = Category.objects.get(slug=category_slug)
+        products = Product.objects.filter(category=category, is_available=True)
     else:
         products = Product.objects.all().filter(is_available=True)
     product_count = products.count()
@@ -31,7 +33,7 @@ def store(request, category_slug=None):
 
     context = {
         'products': paged_products,
-        'products_count': product_count
+        'products_count': product_count,
     }
     return render(request, 'store/store.html', context)
 
@@ -70,12 +72,13 @@ def product_detail(request, category_slug, product_slug):
         '''
         get review rating details of the product
         '''
-        reviews = ReviewRating.objects.filter(product=single_product)
+        reviews = ReviewRating.objects.filter(product=single_product, status=True)
         for review in reviews:
             review.get_profile_pic_url = review.user.get_profile_pic(review.user)
 
     except Exception as e:
         raise e
+
     context = {
         'single_product': single_product,
         'is_product_in_cart': is_product_in_cart,
@@ -83,6 +86,7 @@ def product_detail(request, category_slug, product_slug):
         'product_gallery': product_gallery,
         'reviews': reviews,
     }
+
     return render(request, 'store/product_detail.html', context)
 
 '''

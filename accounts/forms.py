@@ -45,7 +45,8 @@ write a User Form using Account Model
 class UserForm(forms.ModelForm):
     class Meta:
         model = Account
-        fields = ['first_name', 'last_name', 'email', 'phone']
+        fields = ['first_name', 'last_name', 'phone']
+        # email field is defined inside html
 
     '''
     write a method to apply css to the all forms fields
@@ -53,16 +54,15 @@ class UserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-control'
-        self.fields['first_name'].widget.attrs['placeholder'] = 'Enter First Name'
-        self.fields['last_name'].widget.attrs['placeholder'] = 'Enter Last Name'
-        self.fields['email'].widget.attrs['placeholder'] = 'Enter Email'
-        self.fields['phone'].widget.attrs['placeholder'] = 'Enter Phone'
+            self.fields[field].widget.attrs['class']='form-control'
 
 '''
 Write a User Profile Form using User Profile Model
 '''
 class UserProfileForm(forms.ModelForm):
+
+    profile_pic = forms.ImageField(required=False, error_messages={'invalid': ('remove currently stored picture path')}, widget=forms.FileInput)
+
     class Meta:
         model = UserProfile
         fields = ['address_line_1', 'address_line_2', 'city', 'pincode', 'state', 'country', 'profile_pic']
@@ -73,11 +73,4 @@ class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-control'
-        self.fields['address_line_1'].widget.attrs['placeholder'] = 'Enter Address Line 1'
-        self.fields['address_line_2'].widget.attrs['placeholder'] = 'Enter Address Line 2'
-        self.fields['city'].widget.attrs['placeholder'] = 'Enter City'
-        self.fields['pincode'].widget.attrs['placeholder'] = 'Enter Pincode'
-        self.fields['state'].widget.attrs['placeholder'] = 'Enter State'
-        self.fields['country'].widget.attrs['placeholder'] = 'Enter Country'
-        self.fields['profile_pic'].widget.attrs['placeholder'] = 'Enter Profile Pic'
+            self.fields[field].widget.attrs['class']='form-control'

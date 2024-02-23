@@ -19,6 +19,8 @@ def send_otp(request):
     
     # Store OTP secret key and expiration time in session
     request.session['otp_secret_key'] = otp_secret_key
-    request.session['otp_valid_until'] = str(datetime.now() + timedelta(minutes=1))
+
+    valid_date = datetime.now() + timedelta(minutes=1)
+    request.session['otp_valid_until'] = str(valid_date)
     
     print(f"Your OTP is: {otp}")

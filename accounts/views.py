@@ -37,7 +37,7 @@ def register(request):
 
             user_profile = UserProfile()
             user_profile.user = user
-            user_profile.profile_pic = 'default/default_profile_pic.png'
+            user_profile.profile_pic = 'default/default_profile_pic.jpg'
             user_profile.save()
 
             messages.success(request, 'Registration successful.')
@@ -80,6 +80,7 @@ def otp(request):
     if request.method == 'POST':
         otp = request.POST['otp']
         email = request.session['email']
+        
         otp_secret_key = request.session['otp_secret_key']
         otp_valid_until = request.session['otp_valid_until']
 
@@ -87,8 +88,9 @@ def otp(request):
             valid_until = datetime.fromisoformat(otp_valid_until)
 
             if valid_until > datetime.now():
-                totp = pyotp.TOTP(otp_secret_key)
+                totp = pyotp.TOTP(otp_secret_key, interval=60)
                 
+                print(totp.verify(otp))
                 if totp.verify(otp):
                     user = get_object_or_404(Account, email=email)
 
@@ -265,11 +267,11 @@ def edit_profile(request):
 
     if request.method == 'POST':
         user_form = UserForm(request.POST, instance=user)
-        profile_form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
+        user_profile_form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
 
-        if user_form.is_valid() and profile_form.is_valid():
+        if user_form.is_valid() and user_profile_form.is_valid():
             user_form.save()
-            profile_form.save()
+            user_profile_form.save()
             messages.success(request, 'Profile updated successfully')
             return redirect('dashboard')
         else:
@@ -277,11 +279,11 @@ def edit_profile(request):
             return redirect('edit_profile')
     else:
         user_form = UserForm(instance=user)
-        profile_form = UserProfileForm(instance=user_profile)
+        user_profile_form = UserProfileForm(instance=user_profile)
 
         context = {
             'user_form': user_form,
-            'profile_form': profile_form,
+            'user_profile_form': user_profile_form,
             'user_profile': user_profile,
         }
         return render(request, 'accounts/edit_profile.html', context)

@@ -27,16 +27,19 @@ def cart(request):
             cart = Cart.objects.get(cart_id=get_cart_id(request))
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
     except CartItem.DoesNotExist:
-        cart_items = []
+        pass
+    
     total = 0
     quantity = 0
     for item in cart_items:
         total += item.product.price * item.quantity
         quantity += item.quantity
-    tax = 0.05 * total
+    
+    tax = round(0.05 * total,2)
     grand_total = total + tax
+
     context = {
-        'cart_item': cart_items,
+        'cart_items': cart_items,
         'quantity': quantity,
         'total': total,
         'tax': tax,
@@ -62,7 +65,6 @@ def add_cart(request, product_id):
                 product_variation.append(variation)
             except Variation.DoesNotExist:
                 pass
-    product_variation = []
     
     if request.user.is_authenticated:
         cart_items = CartItem.objects.filter(user=request.user, product=product)
@@ -106,9 +108,17 @@ def add_cart(request, product_id):
                 cart_item.variation.clear()
                 cart_item.variation.add(*product_variation)
             cart_item.save()
+    
     else:
-        cart = Cart.objects.get(cart_id=get_cart_id(request))
-        cart_items = CartItem.objects.get(cart=cart, product=product)
+        try:
+            cart = Cart.objects.get(cart_id=get_cart_id(request))
+        except Cart.DoesNotExist:
+            cart = Cart.objects.create(
+                cart_id = get_cart_id(request)
+            )   
+        cart.save()
+
+        cart_items = CartItem.objects.filter(cart=cart, product=product)
 
         if cart_items.exists():
             existing_variation_list = []
@@ -211,11 +221,11 @@ def checkout(request):
         total += item.product.price * item.quantity
         quantity += item.quantity
     
-    tax = 0.05 * total
+    tax = round(0.05 * total,2)
     grand_total = total + tax
     
     context = {
-        'cart_item': cart_items,
+        'cart_items': cart_items,
         'quantity': quantity,
         'total': total,
         'tax': tax,
